@@ -2,6 +2,7 @@ package com.example.ifpb.earphonego
 
 import android.content.ContentValues
 import android.content.Context
+import android.util.Log
 import java.security.AccessControlContext
 
 class MusicaDAO{
@@ -14,9 +15,11 @@ class MusicaDAO{
 
     // Inserir musicas
     fun add(musica: Musica){
+        //Log.i("EarphoneGo", "Adicionar no banco")
         val cv = ContentValues()
         cv.put("nome", musica.nome)
         cv.put("tempo", musica.tempo.timeInMillis)
+        //Log.i("EarphoneGo", cv.toString())
         this.banco.writableDatabase.insert(TABLE, null, cv)
     }
 
@@ -34,6 +37,7 @@ class MusicaDAO{
                 musica.id = cursor.getInt(cursor.getColumnIndex("id"))
                 musica.nome = cursor.getString(cursor.getColumnIndex("nome"))
                 musica.tempo.timeInMillis = cursor.getLong(cursor.getColumnIndex("tempo"))
+                lista.add(musica)
             } while (cursor.moveToNext())
         }
 

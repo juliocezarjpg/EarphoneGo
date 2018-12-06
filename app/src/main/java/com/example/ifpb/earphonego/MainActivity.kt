@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.ListView
@@ -84,11 +85,11 @@ class MainActivity : AppCompatActivity() {
 
         if (resultCode == Activity.RESULT_OK){
             val musica = data?.getSerializableExtra("MUSICA") as Musica
-            //Log.i("AMIGO", amigo.toString())
+            //Log.i("EarphoneGo", musica.toString())
 
             if (requestCode == ADD){
                 this.dao.add(musica)
-                //Log.i("AMIGO", this.dao.read().toString())
+                //Log.i("EarphoneGo", this.dao.read().toString())
             }else{
                 this.dao.update(musica)
             }
