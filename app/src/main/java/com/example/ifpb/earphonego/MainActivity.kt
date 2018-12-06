@@ -1,7 +1,11 @@
 package com.example.ifpb.earphonego
 
 import android.app.Activity
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.net.Uri
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
@@ -12,10 +16,22 @@ import android.widget.ListView
 
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
+import android.support.v4.content.ContextCompat.startActivity
+import android.support.v4.content.ContextCompat.startActivity
+import android.app.SearchManager
+import android.content.ComponentName
+import android.provider.MediaStore
+
+
+
+
 
 class MainActivity : AppCompatActivity() {
     private lateinit var lista: ListView
     private lateinit var dao: MusicaDAO
+    private lateinit var earphoneReceiver: earphoneGoReceiver
+
+    private lateinit var ifEarphone: IntentFilter
 
     val ADD = 1
     val EDIT = 2
@@ -29,6 +45,11 @@ class MainActivity : AppCompatActivity() {
         this.dao = MusicaDAO(context = this)
 
         this.lista.adapter = MusicaAdapter(this)
+
+        this.earphoneReceiver = earphoneGoReceiver()
+
+        this.ifEarphone = IntentFilter()
+        this.ifEarphone.addAction(Intent.ACTION_HEADSET_PLUG)
 
 
         //Inserir musica nova
@@ -96,4 +117,33 @@ class MainActivity : AppCompatActivity() {
             this.atualizar()
         }
     }
+
+    override fun onResume() {
+        super.onResume()
+        registerReceiver(this.earphoneGoReceiver(), this.ifEarphone)
+    }
+
+    inner class earphoneGoReceiver: BroadcastReceiver(){
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent?.action == Intent.ACTION_HEADSET_PLUG){
+
+                Log.i("EarphoneGo", intent.getIntExtra("state", -1).toString())
+                Log.i("EarphoneGo", "Oi")
+
+
+                if (intent.getIntExtra("state", -1) == 1) {
+                    val intent = Intent(Intent.ACTION_MAIN)
+                    intent.action = MediaStore.INTENT_ACTION_MUSIC_PLAYER
+                    intent.setComponent(ComponentName("com.spotify.music", "com.spotify.music.MainActivity"))
+                    //intent.component = ComponentName("com.spotify.mobile.android.ui", "com.spotify.mobile.android.ui.Launcher")
+                    //intent.putExtra(SearchManager.QUERY, trackName)
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    context!!.startActivity(intent)
+                }
+
+            }
+
+        }
+    }
+
 }
