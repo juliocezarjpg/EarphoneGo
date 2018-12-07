@@ -1,6 +1,7 @@
 package com.example.ifpb.earphonego
 
 import android.app.Activity
+import android.app.Notification
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -21,6 +22,14 @@ import android.support.v4.content.ContextCompat.startActivity
 import android.app.SearchManager
 import android.content.ComponentName
 import android.provider.MediaStore
+import android.support.v4.app.NotificationCompat
+import android.view.KeyEvent
+import android.view.KeyEvent.KEYCODE_MEDIA_PLAY
+import android.app.NotificationManager
+
+
+
+
 
 
 
@@ -35,6 +44,7 @@ class MainActivity : AppCompatActivity() {
 
     val ADD = 1
     val EDIT = 2
+    val NOTIFICATION = 3
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,8 +64,10 @@ class MainActivity : AppCompatActivity() {
 
         //Inserir musica nova
         fab.setOnClickListener { view ->
+
             val intent = Intent(this, FormActivity::class.java)
             startActivityForResult(intent, ADD)
+
         }
 
         //Editar uma musica que ja esta na lista
@@ -69,12 +81,18 @@ class MainActivity : AppCompatActivity() {
 
         this.lista.setOnItemLongClickListener { parent, view, position, id ->
             val musica = this.lista.adapter.getItem(position) as Musica
+
+            val intent = Intent(Intent.ACTION_MAIN)
+            intent.action = MediaStore.INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH
+            intent.setComponent(ComponentName("com.spotify.music", "com.spotify.music.MainActivity"))
+            intent.putExtra(SearchManager.QUERY, musica.nome)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            startActivity(intent)
+
             this.dao.delete(musica.id)
             this.atualizar()
             true
         }
-
-
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -130,12 +148,17 @@ class MainActivity : AppCompatActivity() {
                 Log.i("EarphoneGo", intent.getIntExtra("state", -1).toString())
                 Log.i("EarphoneGo", "Oi")
 
+                val i = Intent(Intent.ACTION_MEDIA_BUTTON)
+                i.component = ComponentName("com.spotify.music", "com.spotify.music.internal.receiver.MediaButtonReceiver")
+                i.putExtra(Intent.EXTRA_KEY_EVENT,  KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PLAY))
+                sendOrderedBroadcast(i, null)
+
 
                 if (intent.getIntExtra("state", -1) == 1) {
                     val intent = Intent(Intent.ACTION_MAIN)
-                    intent.action = MediaStore.INTENT_ACTION_MUSIC_PLAYER
+                    intent.action = MediaStore.INTENT_ACTION_MUSIC_PLAYER // Mudar para Query
+                    //intent.action = MediaStore.INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH
                     intent.setComponent(ComponentName("com.spotify.music", "com.spotify.music.MainActivity"))
-                    //intent.component = ComponentName("com.spotify.mobile.android.ui", "com.spotify.mobile.android.ui.Launcher")
                     //intent.putExtra(SearchManager.QUERY, trackName)
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     context!!.startActivity(intent)
