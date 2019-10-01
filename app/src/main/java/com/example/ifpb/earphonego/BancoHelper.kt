@@ -10,7 +10,7 @@ class BancoHelper(context: Context):
     override fun onCreate(db: SQLiteDatabase?) {
         val sql = "create table if not exists musica(" +
                 "id integer primary key autoincrement," +
-                " nome text," +
+                " nome varchar(255)," +
                 " tempo timestamp)"
         db?.execSQL(sql)
     }
